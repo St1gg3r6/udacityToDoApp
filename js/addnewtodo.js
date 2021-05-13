@@ -30,3 +30,4 @@ document.querySelector("#form").onsubmit = function(e) {
     } else {
         window.alert("Please enter something!!");
     }
+}

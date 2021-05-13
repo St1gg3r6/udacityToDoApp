@@ -1,7 +1,7 @@
 <html>
     <head>
         <title>Todo App</title>
-        <link rel="script" href="/js/addnewtodo.js">
+        <!-- <script src="../js/addnewtodo.js"></script> -->
         <style>
             .hidden {
                 display: none;
@@ -19,7 +19,7 @@
             <li>{{ d.description }}</li>
             {% endfor %}
         </ul>
-        <!-- <script>
+        <script>
             document.querySelector("#form").onsubmit = function(e) {
                 e.preventDefault();
                 const newDescription = document.querySelector("#description");
@@ -53,6 +53,6 @@
                     window.alert("Please enter something!!");
                 }
             }
-        </script> -->
+        </script>
     </body>
 </html>
