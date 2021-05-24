@@ -27,7 +27,12 @@
 
             <ul id="todoitems" class="todos">
                 {% for d in data %}
-                <li class="todoitem"><span class="todotext">{{ d.description }}</span></li>
+                <li class="todoitem">
+                    <input type="checkbox" name="complete" id="complete" data-id="{{ d.todoid }}"
+                        class="check-completed" {% if d.completed %} checked {% endif %}>
+                    <span class="todotext">{{ d.description }}</span>
+                    <button type="submit" id="delete-todo" class="delete-todo" data-id="{{ d.todoid }}">&cross;</button>
+                </li>
                 {% endfor %}
             </ul>
         </section>

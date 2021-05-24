@@ -48,6 +48,7 @@ def create_todo_a():
         db.session.add(newtodo)
         db.session.commit()
         # Add the data to the dictionary to be sent back
+        data['todoid'] = newtodo.todoid
         data['description'] = newtodo.description
     except:
         error = True
@@ -62,12 +63,42 @@ def create_todo_a():
         return jsonify(data)
 
 
+@app.route('/todos/<todoid>/updateCompStatus', methods=['POST'])
+def updateTodoCompStatus(todoid):
+    print('todoid = ', todoid)
+    try:
+        completeStatus = request.get_json()['completed']
+        todoItem = Todo.query.get(todoid)
+        todoItem.completed = completeStatus
+        db.session.commit()
+    except:
+        db.session.rollback()
+    finally:
+        db.session.close()
+    # return redirect(url_for('index'))
+    return 'Record Updated'
+
+
+@app.route('/todos/<todoid>/deleteTodo', methods=['DELETE'])
+def deleteTodo(todoid):
+    print('todoid = ', todoid)
+    try:
+        todoitem = Todo.query.get(todoid)
+        db.session.delete(todoitem)
+        db.session.commit()
+    except:
+        db.session.rollback()
+    finally:
+        db.session.close()
+    return 'Record Deleted'
+
+
 @app.route('/')
 def index():
     # 'data' is the variable to pass to the HTML template
     # which contains the data that needs to be processed
     # by the jinja code in the HTML file.
-    return render_template('index.html', data=Todo.query.all())
+    return render_template('index.html', data=Todo.query.order_by('todoid').all())
 
 
 if __name__ == '__main__':
