@@ -1,0 +1,132 @@
+<html>
+
+<head>
+    <title>Todo App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+
+<body>
+    <main>
+        <header>
+            <h1>Udacity Todo App</h1>
+        </header>
+        <section class="frame">
+            <form id="form" class="entryform" method="POST" action="/todos/create">
+                <input type="text" id="description" class="description" name="description">
+                <input type="submit" class="submit" value="Create">
+            </form>
+
+            <div id="error" class="hidden">Something went wrong!</div>
+
+            <ul id="todos" class="todos">
+                {% for todo in todos %}
+                <li class="todoitem"><input class="check-completed" data-id="{{ todo.todoid }}" type="checkbox" {% if
+                        todo.completed %} checked {% endif %} />
+                    <span class="todotext">{{ todo.description }}</span>
+                    <button class="delete-todo" data-id="{{ todo.todoid }}">&cross;</button>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+    </main>
+    <script>
+        const checkboxes = document.querySelectorAll('.check-completed');
+        const deletebuttons = document.querySelectorAll('.delete-todo');
+        const elTodos = document.querySelector('#todos');
+        const elError = document.querySelector('#error');
+
+        for (let i = 0; i < checkboxes.length; i++) {
+
+            const checkbox = checkboxes[i];
+            const delbtn = deletebuttons[i];
+
+            checkbox.onchange = function (e) {
+                const newCompleted = e.target.checked;
+                const todoid = e.target.dataset['id'];
+                fetch('/todos/' + todoid + '/set-completed', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        'completed': newCompleted
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(function () {
+                        elError.className = 'hidden';
+                        elTodos.className = 'todos';
+                    })
+                    .catch(function () {
+                        elError.className = 'todos';
+                        elTodos.className = 'hidden';
+                    })
+            }
+
+            delbtn.onclick = function (e) {
+                const todoid = e.target.dataset['id'];
+                fetch('/todos/' + todoid, {
+                    method: 'DELETE'
+                })
+                    .then(function () {
+                        const item = e.target.parentElement;
+                        item.remove();
+                    })
+            }
+        }
+
+        document.querySelector("#form").onsubmit = function (e) {
+            e.preventDefault();
+            const newDescription = document.querySelector("#description");
+            if (newDescription.value != '') {
+                fetch('/todos/create', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        'description': newDescription.value
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(jsonResponse => {
+                        const liItem = document.createElement('li');
+                        liItem.className = 'todoitem';
+
+                        const checkbox = document.createElement('input');
+                        checkbox.className = 'check-completed';
+                        checkbox.type = 'checkbox';
+                        checkbox.setAttribute('data-id', jsonResponse.id);
+                        liItem.appendChild(checkbox);
+                        console.log("list item after appending checkbox: ", liItem);
+
+                        const span = document.createElement('span');
+                        span.className = 'todotext';
+                        const text = document.createTextNode(' ' + jsonResponse.description);
+                        span.appendChild(text);
+                        liItem.appendChild(span);
+
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'delete-todo';
+                        deleteBtn.setAttribute('data-id', jsonResponse.id);
+                        deleteBtn.innerHTML = '&cross;';
+                        liItem.appendChild(deleteBtn);
+
+                        document.querySelector("#todos").appendChild(liItem);
+                        newDescription.value = '';
+                        elTodos.className = 'todos';
+                        elError.className = 'hidden';
+                    })
+                    .catch(function () {
+                        elError.className = 'todos';
+                        elTodos.className = 'hidden';
+                    })
+            } else {
+                window.alert("Please enter something!!");
+            }
+        }
+    </script>
+
+</body>
+
+</html>

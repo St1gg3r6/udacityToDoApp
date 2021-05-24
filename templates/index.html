@@ -1,58 +1,38 @@
-<html>
-    <head>
-        <title>Todo App</title>
-        <!-- <script src="../js/addnewtodo.js"></script> -->
-        <style>
-            .hidden {
-                display: none;
-            }
-        </style>
-    </head>
-    <body>
-        <form id="form">
-            <input type="text" id="description" name="description">
-            <input type="submit" value="Create">
-        </form>
-        <div id="error" class="hidden">Something went wrong!</div>
-        <ul id="todos">
-            {% for d in data %}
-            <li>{{ d.description }}</li>
-            {% endfor %}
-        </ul>
-        <script>
-            document.querySelector("#form").onsubmit = function(e) {
-                e.preventDefault();
-                const newDescription = document.querySelector("#description");
-                const elTodos = document.querySelector('#todos');
-                const elError = document.querySelector('#error')
-                if (newDescription.value != '') {
-                    fetch('/todos/create', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            'description': newDescription.value
-                        }),
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then (response => response.json())
-                    .then(jsonResponse => {
-                        console.log(jsonResponse);
-                        const liItem = document.createElement('li');
-                        liItem.innerText = jsonResponse['description'];
-                        document.querySelector("ul").appendChild(liItem);
-                        newDescription.value = '';
-                        elTodos.className = '';
-                        elError.className = 'hidden';
-                    })
-                    .catch(function() {
-                        elError.className = '';
-                        elTodos.className = 'hidden';
-                    })
-                } else {
-                    window.alert("Please enter something!!");
-                }
-            }
-        </script>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Todo App</title>
+</head>
+
+<body>
+    <main>
+        <section class="frame">
+            <!-- synchronous form -->
+            <form id="form_sync" class="entryform" action="/todos/create" method="post">
+                <input type="text" name="description" id="description" class="description">
+                <input type="submit" class="submit" value="Create Todo (Sync)">
+            </form>
+            <!-- asyncronous form (ajax) using fetch in js -->
+            <form id="form_async" class="entryform">
+                <input type="text" name="description_a" id="description_a" class="description">
+                <input type="submit" class="submit" value="Create Todo (Async)">
+            </form>
+
+            <div id="error" class="hidden">Something went wrong!</div>
+
+            <ul id="todoitems" class="todos">
+                {% for d in data %}
+                <li class="todoitem"><span class="todotext">{{ d.description }}</span></li>
+                {% endfor %}
+            </ul>
+        </section>
+    </main>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
 </html>

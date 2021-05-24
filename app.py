@@ -1,15 +1,9 @@
-from flask import Flask, render_template, request, abort
-from flask.json import jsonify
+from flask import Flask, render_template, request, url_for, redirect, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-import sys
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://stephenusher@localhost:5432/todoapp'
-# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
-migrate = Migrate(app, db)
 
 
 class Todo(db.Model):
@@ -18,36 +12,63 @@ class Todo(db.Model):
     description = db.Column(db.String(), nullable=False)
     completed = db.Column(db.Boolean, nullable=False, default=False)
 
-    def __repr__(self) -> str:
-        return f'<Todo {self.todoid} {self.description}>'
+    def __repr__(self):
+        return f'<Todo {self.todoid} {self.description} >'
 
 
-@app.route('/')
-def index():
-    return render_template('index.html', data=Todo.query.all())
+db.create_all()
 
 
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
     error = False
-    body = {}
     try:
-        description = request.get_json()['description']
-        todo = Todo(description=description)
-        db.session.add(todo)
+        newdescription = request.form.get('description', '')
+        newtodo = Todo(description=newdescription)
+        db.session.add(newtodo)
         db.session.commit()
-        body['description'] = todo.description
     except:
         error = True
         db.session.rollback()
-        print(sys.exc_info())
+    finally:
+        db.session.close()
+    if not error:
+        # The url_for argument is the function name that returns the page to load.
+        return redirect(url_for('index'))
+
+
+@app.route('/todos/create_a', methods=['POST'])
+def create_todo_a():
+    error = False
+    # Create an empty dictionary to send json object back to the client
+    data = {}
+    try:
+        newdescription = request.get_json()['description']
+        newtodo = Todo(description=newdescription)
+        db.session.add(newtodo)
+        db.session.commit()
+        # Add the data to the dictionary to be sent back
+        data['description'] = newtodo.description
+    except:
+        error = True
+        db.session.rollback()
     finally:
         db.session.close()
     if error:
+        # Stop the request so that it doesn't expect a result
         abort(400)
     else:
-        return jsonify(body)
+        # Send the response back to the client with the json object to be processed in the js function
+        return jsonify(data)
+
+
+@app.route('/')
+def index():
+    # 'data' is the variable to pass to the HTML template
+    # which contains the data that needs to be processed
+    # by the jinja code in the HTML file.
+    return render_template('index.html', data=Todo.query.all())
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
