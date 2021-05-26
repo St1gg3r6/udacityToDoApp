@@ -12,12 +12,35 @@
 <body>
     <main>
         <section class="frame">
+            <h3>Todo Lists</h3>
+            <form id="listform" class="entryform" action="/lists/create" method="POST">
+                <input type="text" name="listdescription" id="listdescription" class="description" required>
+                <input type="submit" class="submit" value="Create List">
+            </form>
+            <div id="listerror" class="hidden">Something went wrong with the list</div>
+            <p id="selected" class="hidden">{{ selected }}</p>
+            <ul id="todolist" class="todos">
+                {% for l in list %}
+                <li id="listitem" class="todoitem" data-id="{{ l.todolistid }}">
+                    <input type="checkbox" name="listcomplete" id="listcomplete" class="check-completed"
+                        data-id="{{ l.todolistid }}" {% if l.completed %} checked {% endif %}>
+                    <a id="listname" class="todotext" data-id="{{ l.todolistid }}" href="/lists/{{ l.todolistid }}">{{
+                        l.name }}</a>
+                    <button type="submit" id="delete-list" class="delete-todo"
+                        data-id="{{ l.todolistid }}">&cross;</button>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="frame">
             <!-- synchronous form -->
-            <form id="form_sync" class="entryform" action="/todos/create" method="post">
+            <!-- <form id="form_sync" class="entryform" action="/todos/create" method="post">
                 <input type="text" name="description" id="description" class="description">
                 <input type="submit" class="submit" value="Create Todo (Sync)">
-            </form>
+            </form> -->
             <!-- asyncronous form (ajax) using fetch in js -->
+            <h4 id="selectedlistname"></h4>
             <form id="form_async" class="entryform">
                 <input type="text" name="description_a" id="description_a" class="description">
                 <input type="submit" class="submit" value="Create Todo (Async)">

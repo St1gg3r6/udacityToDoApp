@@ -72,6 +72,11 @@ header {
   display: block;
   margin: 0.3rem 0;
 }
+.selected {
+  background-color: rgba(173, 216, 230, 0.582);
+  color: blue;
+}
+
 .todoitem:after {
   content: "";
   display: block;
@@ -88,6 +93,8 @@ header {
   /* background-color: darkgray; */
   width: auto;
   margin-left: 0.3rem;
+  color: white;
+  text-decoration: none;
 }
 .delete-todo {
   float: right;
