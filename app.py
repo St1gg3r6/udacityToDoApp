@@ -34,6 +34,27 @@ class Todo(db.Model):
         return f'<Todo {self.todoid} {self.description} >'
 
 
+@app.route('/nest')
+def nestpage():
+    finaldata = []
+    listdata = {}
+    lists = TodoList.query.order_by('todolistid').all()
+    for list in lists:
+        print("FIRST LINE OF FOR LOOP with list name: ", list.name)
+        todos = Todo.query.filter_by(
+            todolistid=list.todolistid).order_by('todoid').all()
+        listdata = {
+            "todolistid": list.todolistid,
+            "name": list.name,
+            "todos": todos
+        }
+        print("LIST DATA TO BE ADDED TO FINALDATA: ", listdata)
+        print("FINAL DATA TO BE OUTPUT BEFORE APPEND:", finaldata)
+        finaldata.append(listdata)
+        print("FINAL DATA TO BE OUTPUT AFTER APPEND:", finaldata)
+    return render_template('nest.html', lists=finaldata)
+
+
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
     error = False
